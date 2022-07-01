@@ -1,0 +1,28 @@
+{
+  "name": "fleet-simulator",
+  "version": "1.0.0",
+  "main": "main.ts",
+  "repository": "https://github.com/dolittle-entropy/FLEET-simulator.git",
+  "author": "SINTEF",
+  "license": "MIT",
+  "private": true,
+  "engines": {
+    "node": ">=16"
+  },
+  "scripts": {
+    "start": "ts-node src/cli/main.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^16.11.6",
+    "@typescript-eslint/eslint-plugin": "^5.2.0",
+    "@typescript-eslint/parser": "^5.2.0",
+    "eslint": "^8.1.0",
+    "eslint-plugin-header": "^3.1.1",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.4.4"
+  },
+  "dependencies": {
+    "commander": "^9.3.0",
+    "neo4j-driver": "^4.4.0"
+  }
+}
