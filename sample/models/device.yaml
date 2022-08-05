@@ -1,0 +1,25 @@
+device_types:
+  laptop:
+    host: __local_ip__
+    id: __some_uid__
+    arch: amd64
+    execEnv:
+      _type: docker_engine
+      port: 2375
+
+
+devices:
+  my_local_machine:
+    type: laptop
+    host: localhost
+    id: SINTEF9977
+    arch: amd64
+    lastSeen:  2022-06-07T07:37:13Z
+
+trust_agents:
+  ta_docker_amd64:
+    artefact: __some_url__
+    developer: __some_developer_id__
+    
+
+  

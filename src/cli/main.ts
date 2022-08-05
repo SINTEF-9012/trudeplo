@@ -8,3 +8,7 @@ program.command('deploy')
         console.log('nothing to deploy')
     })
 program.parse(process.argv)
+
+export function justToTest(){
+    return 1
+}
