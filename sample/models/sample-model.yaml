@@ -4,13 +4,19 @@ device_types:
     id: __some_uid__
     arch: amd64
     execEnv:
-      _type: docker_engine
+      name: docker_engine
       port: 2375
 
+software_types:
+  software_type:
+    artefact: __some_url__
+    developer: __some_developers_id__
+  docker_component:
+    image: __image_name__
 
 devices:
   my_local_machine:
-    type: laptop
+    _from: laptop
     host: localhost
     id: SINTEF9977
     arch: amd64
