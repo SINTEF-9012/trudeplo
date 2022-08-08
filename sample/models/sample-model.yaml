@@ -8,7 +8,7 @@ device_types:
       port: 2375
 
 software_types:
-  software_type:
+  software_type: 
     artefact: __some_url__
     developer: __some_developers_id__
   docker_component:
@@ -19,11 +19,11 @@ devices:
     _from: laptop
     host: localhost
     id: SINTEF9977
-    arch: amd64
     lastSeen:  2022-06-07T07:37:13Z
 
 trust_agents:
   ta_docker_amd64:
+    _from: docker_component
     artefact: __some_url__
     developer: __some_developer_id__
     

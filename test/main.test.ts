@@ -8,4 +8,10 @@ describe("toy tests",  ()=>{
         let result = await docker.listImages()
         expect(result.length).toBeGreaterThan(0)
     })
+    it("Should create a hello-world", async ()=>{
+        const docker = new DockerAdapter({host:'localhost'})
+        let container = await docker.createContainer({image: 'hello-world'})
+        console.log(await container.remoteContainer?.inspect())
+    })
 })
+
