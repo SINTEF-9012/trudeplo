@@ -1,11 +1,13 @@
 import Docker from 'dockerode'
+import { DateTime } from 'neo4j-driver';
 
 export interface Container{
     name: string;
     image: string;
-    created: boolean;
+    created?: DateTime;
     running: boolean;
-    remoteContainer?: Docker.Container
+    remoteContainer?: Docker.Container;
+    id?: string
 }
 
 export interface ArtifactModel{
@@ -24,13 +26,12 @@ export class DockerAdapter{
     }
 
     async updateContainers(){
-        let remoteContainers = await this.docker.listContainers();
-        console.log(remoteContainers)
+        let remoteContainers = await this.docker.listContainers({all: true});
         this.containers = remoteContainers.map(i => { return {
             name: i.Names[0],
             image: i.Image,
-            created: true,
-            running: false
+            running: i.State.toLowerCase() == 'running',
+            id: i.Id
          }})
         return this.containers;
     }
@@ -38,6 +39,10 @@ export class DockerAdapter{
     async listImages(){
         let images = await this.docker.listImages()
         return images;
+    }
+
+    async ping(){
+        return ((await this.docker.ping()) as Buffer).toString() == 'OK'
     }
 
     async deployArtefact(model: ArtifactModel){
@@ -48,16 +53,16 @@ export class DockerAdapter{
         const image = model.image
         const name = model.name ?? 'trust_agent'
         await this.updateContainers()
-        console.log(this.containers)
 
-        let containerStub = this.containers.find(item => item.name == name)
+        let containerStub = this.containers.find(item => item.name.endsWith(name))
             
         if(! containerStub){
-            containerStub = {name: name, image: image, created: false, running: false}
+            containerStub = {name: name, image: image, running: false}
             this.containers.push(containerStub)
         }
         else{
-            await containerStub.remoteContainer?.remove()
+            let remoteContainer = this.docker.getContainer(containerStub.id!)
+            let result = await remoteContainer.remove({force: true})
         }
 
         let container = await this.docker.createContainer({
