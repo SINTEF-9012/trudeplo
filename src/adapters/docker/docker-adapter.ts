@@ -54,11 +54,12 @@ export class DockerAdapter extends AbstractAdapter{
         if(!elem['_agent']['loaded']){
             throw new Error ('load the agent first')
         }
-        let response = await this.createContainer(elem._agent)
+        let response = await this.createAndRunContainer(elem._agent)
         elem._agent = {
             ...elem._agent,
             ...response
         }
+        
         return elem._agent
     }
 
@@ -88,7 +89,7 @@ export class DockerAdapter extends AbstractAdapter{
 
 
     async deployArtefact(model: ArtifactModel){
-        return this.createContainer(model)
+        return this.createAndRunContainer(model)
     }
 
     /**
@@ -97,7 +98,7 @@ export class DockerAdapter extends AbstractAdapter{
      * @param model 
      * @returns Internal record of the created container
      */
-    async createContainer(model: ArtifactModel){
+    async createAndRunContainer(model: ArtifactModel){
         const image = model.image
         const name = model.name ?? 'trust_agent'
         await this.updateContainers()
@@ -118,7 +119,7 @@ export class DockerAdapter extends AbstractAdapter{
             name: name,
             Image: image
         })
-
+        await container.start()
         containerStub._instance = container
         return containerStub
     }
@@ -146,6 +147,30 @@ export class DockerAdapter extends AbstractAdapter{
         }
     }
 
+    async getContainerByName(name: string){
+        if(! name.startsWith('/'))
+            name = '/' + name;
+        const ctnerInfos = await this.docker.listContainers({all: true});
+        // console.log(ctnerInfos)
+        let found =  ctnerInfos.find(i => i.Names.includes(name))
+        if(found)
+            return this.docker.getContainer(found.Id)
+        else
+            return undefined
+    }
 
+    async isAgentRunning(): Promise<boolean> {
+        let agentModel = this.getModel()['_agent']
+        if(! agentModel){
+            throw new Error ('agent not assigned')
+        }
+        return (await this.isContainerRunning(agentModel) == true)
+    }
+
+    async isContainerRunning(model: {name?: string}){
+        let container = await this.getContainerByName(model.name!)
+        // console.log(container)
+        return (await container?.inspect())?.State.Running
+    }
 
 }

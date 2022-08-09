@@ -11,8 +11,11 @@ export interface BasicArtifactModel{
 
 export abstract class AbstractAdapter{
     model: BasicDeviceModel = {};
-    constructor(model: {}){
+    constructor(model: {agent?: any}){
         model = model
+        if('agent' in model){
+            this.setAgent(model.agent)
+        }
     }
 
     abstract ping(): Promise<boolean>
@@ -25,6 +28,10 @@ export abstract class AbstractAdapter{
         this.model['_agent'] = agent
     }
 
+    getAgent(){
+        return this.model['_agent'] 
+    }
+
     /**
      * load the agent into device
      */
@@ -34,6 +41,11 @@ export abstract class AbstractAdapter{
      * start the agent
      */
     abstract runAgent(): Promise<any>;
+
+    /**
+     * 
+     */
+    abstract isAgentRunning(): Promise<boolean>;
 
     getModel(){
         return this.model
