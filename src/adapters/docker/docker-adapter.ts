@@ -1,28 +1,65 @@
 import Docker from 'dockerode'
-import { DateTime } from 'neo4j-driver';
+import { streamToString } from '../../util/stream';
+import { AbstractAdapter } from '../abstract-adapter';
 
 export interface Container{
     name: string;
     image: string;
-    created?: DateTime;
+    created?: Date;
     running: boolean;
-    remoteContainer?: Docker.Container;
+    _instance?: Docker.Container;
     id?: string
 }
 
 export interface ArtifactModel{
     name?: string;
     image: string;
+    url?: string;
+    localFile?: string;
 }
 
 
-export class DockerAdapter{
+export class DockerAdapter extends AbstractAdapter{
+
     docker: Docker
     containers: Container[] = []
 
-    constructor(engineModel:any){
-        const host = engineModel.host
-        this.docker = new Docker({protocol:'http', host:host, port:2375 })
+    constructor(deviceModel:any){
+        super(deviceModel)
+        const host = deviceModel.host;
+        this.docker = new Docker({protocol:'http', host:host, port:2375 });
+    }
+
+    getModel(){
+        return this.model as {host: string, _agent: any}
+    }
+
+    async loadAgent() {
+        let elem = this.getModel()
+        if(!elem['_agent']){
+            throw new Error ('agent not assigned')
+        }
+        let response = await this.loadImage(elem._agent)
+        if(response){
+            elem._agent['image'] = response
+            elem._agent['loaded'] = true
+        }
+        return elem._agent
+    }
+    async runAgent() {
+        let elem = this.getModel()
+        if(!elem['_agent']){
+            throw new Error ('agent not assigned')
+        }
+        if(!elem['_agent']['loaded']){
+            throw new Error ('load the agent first')
+        }
+        let response = await this.createContainer(elem._agent)
+        elem._agent = {
+            ...elem._agent,
+            ...response
+        }
+        return elem._agent
     }
 
     async updateContainers(){
@@ -41,14 +78,25 @@ export class DockerAdapter{
         return images;
     }
 
+    /**
+     * Check if the Docker Engine is online
+     * @returns true (online) or false
+     */
     async ping(){
         return ((await this.docker.ping()) as Buffer).toString() == 'OK'
     }
+
 
     async deployArtefact(model: ArtifactModel){
         return this.createContainer(model)
     }
 
+    /**
+     * create a container and start it. If there is already a container 
+     * with the same name, it will be removed first.
+     * @param model 
+     * @returns Internal record of the created container
+     */
     async createContainer(model: ArtifactModel){
         const image = model.image
         const name = model.name ?? 'trust_agent'
@@ -65,14 +113,39 @@ export class DockerAdapter{
             let result = await remoteContainer.remove({force: true})
         }
 
+        console.log(`name: ${name}, image: ${image}`)
         let container = await this.docker.createContainer({
             name: name,
             Image: image
         })
 
-        containerStub.remoteContainer = container
+        containerStub._instance = container
         return containerStub
     }
+
+    /**
+     * Load image into the remote docker engine, if there is a local file
+     * Downloading the file from cloud repository should not be the task of
+     * the adapter
+     * @param model 
+     */
+    async loadImage(model: ArtifactModel){
+        let localFile = model.localFile
+        if(localFile){
+            let image_tag = model.image
+            let result = await this.docker.loadImage(localFile, {quiet:true})
+            let resultString = await streamToString(result)
+            try{
+                let response = JSON.parse(resultString)['stream'] as string
+                return response.substring(response.indexOf(':')+1).trim()
+            }
+            catch(e){
+                console.log(resultString)
+                return //not successfuly load any image. return undefined
+            }
+        }
+    }
+
 
 
 }

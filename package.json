@@ -33,6 +33,7 @@
   "dependencies": {
     "commander": "^9.3.0",
     "dockerode": "^3.3.3",
-    "neo4j-driver": "^4.4.0"
+    "neo4j-driver": "^4.4.0",
+    "yaml": "^2.1.1"
   }
 }

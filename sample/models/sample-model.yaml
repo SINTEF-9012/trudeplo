@@ -1,18 +1,21 @@
-device_types:
+types:
   laptop:
+    _type: device
     host: __local_ip__
     id: __some_uid__
     arch: amd64
     execEnv:
       name: docker_engine
       port: 2375
-
-software_types:
-  software_type: 
-    artefact: __some_url__
+  software_artifact: 
+    _type: software
+    url: __some_url__
+    localFile: __some_local_file_path__
     developer: __some_developers_id__
+    signature: __some_signature__
   docker_component:
-    image: __image_name__
+    _from: software_artifact
+    image: __image_tag__
 
 devices:
   my_local_machine:
@@ -20,12 +23,14 @@ devices:
     host: localhost
     id: SINTEF9977
     lastSeen:  2022-06-07T07:37:13Z
+    agent: ta_docker_amd64 #This is normally assigned automatically
 
-trust_agents:
+agents:
   ta_docker_amd64:
     _from: docker_component
-    artefact: __some_url__
-    developer: __some_developer_id__
+    image: songhui/trust-agent:latest
+    localFile: ext/trust-agent-image.tar.gz
+
     
 
   
