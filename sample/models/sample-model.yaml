@@ -1,12 +1,15 @@
 types:
+  docker_env:
+    _type: exec_env
+    name: docker_engine
+    port: 2375
   laptop:
     _type: device
     host: __local_ip__
     id: __some_uid__
     arch: amd64
     execEnv:
-      name: docker_engine
-      port: 2375
+      _from: docker_env
   software_artifact: 
     _type: software
     url: __some_url__

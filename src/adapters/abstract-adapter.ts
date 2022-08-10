@@ -43,7 +43,7 @@ export abstract class AbstractAdapter{
     abstract runAgent(): Promise<any>;
 
     /**
-     * 
+     * Check if the assigned agent is running or not
      */
     abstract isAgentRunning(): Promise<boolean>;
 

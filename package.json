@@ -10,7 +10,7 @@
     "node": ">=16"
   },
   "scripts": {
-    "start": "node -r ts-node/register src/cli/main.ts",
+    "start": "node -r ts-node/register src/cli/cmd.ts",
     "test": "jest"
   },
   "devDependencies": {
