@@ -38,13 +38,17 @@ devices:
     _from: rpi4
     host: 192.168.68.76
     id: raspberrypi
-    agent: ta_docker_amd64 #may not work due to arch mismatch
+    agent: ta_docker_arm64 #may not work due to arch mismatch
 
 agents:
   ta_docker_amd64:
     _from: docker_component
     image: songhui/trust-agent:latest
     localFile: ext/trust-agent-image.tar.gz
+  ta_docker_arm64:
+    _from: docker_component
+    image: songhui/trust-agent:arm64
+    localFile: ext/ta-arm64.tar.gz
 
     
 

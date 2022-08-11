@@ -63,16 +63,16 @@ export class DockerAdapter extends AbstractAdapter{
         return elem._agent
     }
 
-    async updateContainers(){
-        let remoteContainers = await this.docker.listContainers({all: true});
-        this.containers = remoteContainers.map(i => { return {
-            name: i.Names[0],
-            image: i.Image,
-            running: i.State.toLowerCase() == 'running',
-            id: i.Id
-         }})
-        return this.containers;
-    }
+    // async updateContainers(){
+    //     let remoteContainers = await this.docker.listContainers({all: true});
+    //     this.containers = remoteContainers.map(i => { return {
+    //         name: i.Names[0],
+    //         image: i.Image,
+    //         running: i.State.toLowerCase() == 'running',
+    //         id: i.Id
+    //      }})
+    //     return this.containers;
+    // }
 
     async listImages(){
         let images = await this.docker.listImages()
@@ -101,27 +101,32 @@ export class DockerAdapter extends AbstractAdapter{
     async createAndRunContainer(model: ArtifactModel){
         const image = model.image
         const name = model.name ?? 'trust_agent'
-        await this.updateContainers()
 
-        let containerStub = this.containers.find(item => item.name.endsWith(name))
-            
-        if(! containerStub){
-            containerStub = {name: name, image: image, running: false}
-            this.containers.push(containerStub)
-        }
-        else{
-            let remoteContainer = this.docker.getContainer(containerStub.id!)
+        let containerStub:Container = {name: name, image: image, running: false}
+        this.containers.push(containerStub)
+        try{
+            let remoteContainer = await this.getContainer(containerStub)
             let result = await remoteContainer.remove({force: true})
         }
+        catch(e){
+            //no container found, so it's ok
+        }
 
-        console.log(`name: ${name}, image: ${image}`)
+        // console.log(`name: ${name}, image: ${image}`)
         let container = await this.docker.createContainer({
             name: name,
             Image: image
         })
         await container.start()
         containerStub._instance = container
+        containerStub.id = container.id
         return containerStub
+    }
+
+    async stopAgent(): Promise<any> {
+        let agentModel = this.getModel()['_agent']
+        let container = await this.getContainer(agentModel)
+        return await container.remove({force: true})
     }
 
     /**
@@ -159,6 +164,24 @@ export class DockerAdapter extends AbstractAdapter{
             return undefined
     }
 
+    async getContainer(agentModel:{id?: string, name?:string}){
+        if(! agentModel){
+            throw new Error ('agent not assigned')
+        }
+        let container:Docker.Container | undefined = undefined;
+        if(agentModel['id']){
+            container = this.docker.getContainer(agentModel['id'])
+        }
+        else{
+            container = await this.getContainerByName(agentModel['name']!)
+        }
+        if(! container){
+            let simpleAgent = (({name, id})=>({name, id}))(agentModel)
+            throw new Error (`container not found: name: ${simpleAgent}`)
+        }
+        return container
+    }
+
     async isAgentRunning(): Promise<boolean> {
         let agentModel = this.getModel()['_agent']
         if(! agentModel){
@@ -167,10 +190,14 @@ export class DockerAdapter extends AbstractAdapter{
         return (await this.isContainerRunning(agentModel) == true)
     }
 
-    async isContainerRunning(model: {name?: string}){
-        let container = await this.getContainerByName(model.name!)
-        // console.log(container)
-        return (await container?.inspect())?.State.Running
+    async isContainerRunning(model: {name?: string, id?: string}){
+        try{
+            let container = await this.getContainer(model)
+            return (await container?.inspect())?.State.Running
+        }
+        catch(e){
+            return false
+        }
     }
 
 }
