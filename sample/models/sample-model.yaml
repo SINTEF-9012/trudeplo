@@ -3,13 +3,20 @@ types:
     _type: exec_env
     name: docker_engine
     port: 2375
-  laptop:
+  linux_device:
     _type: device
     host: __local_ip__
     id: __some_uid__
-    arch: amd64
+    arch: __amd64_arm64_arm_arm64
+  laptop:
+    arch: x86-64
     execEnv:
       _from: docker_env
+  rpi4:
+    arch: arm64
+    execEnv:
+      _from: docker_env
+    
   software_artifact: 
     _type: software
     url: __some_url__
@@ -27,6 +34,11 @@ devices:
     id: SINTEF9977
     lastSeen:  2022-06-07T07:37:13Z
     agent: ta_docker_amd64 #This is normally assigned automatically
+  my_local_rpi4:
+    _from: rpi4
+    host: 192.168.68.76
+    id: raspberrypi
+    agent: ta_docker_amd64 #may not work due to arch mismatch
 
 agents:
   ta_docker_amd64:

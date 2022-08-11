@@ -25,7 +25,7 @@ describe("toy tests",  ()=>{
         })
         expect(image).toEqual('songhui/trust-agent:latest')
     })
-    it.only("get model from yaml, load image, and run container", async()=>{
+    it("get model from yaml, load image, and run container", async()=>{
         let model = loadFromYaml('sample/models/sample-model.yaml')
         let device = model['devices']['my_local_machine']
         const adapter: AbstractAdapter = new DockerAdapter(device)
@@ -38,6 +38,23 @@ describe("toy tests",  ()=>{
         let afterrun = await adapter.runAgent()
         // console.log(afterrun)
         expect(await adapter.isAgentRunning()).toEqual(true)
+    })
+    it.only("try to deploy to raspberry pi 4", async ()=>{
+        let model = loadFromYaml('sample/models/sample-model.yaml')
+        let device = model['devices']['my_local_rpi4']
+        
+        const adapter: AbstractAdapter = new DockerAdapter(device)
+        expect(adapter.ping()).toBeTruthy()
+        
+        let agentName = device['agent']
+        adapter.setAgent(model['agents'][agentName])
+        let afterload = await adapter.loadAgent()
+        expect(afterload.image).toEqual('songhui/trust-agent:latest')
+        
+        let afterrun = await adapter.runAgent()
+        // console.log(afterrun)
+        expect(await adapter.isAgentRunning()).toEqual(true)
+
     })
     it.skip("try to inspect container", async() =>{
         const docker = new DockerAdapter({host: 'localhost'})

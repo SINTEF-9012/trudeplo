@@ -13,9 +13,6 @@ export abstract class AbstractAdapter{
     model: BasicDeviceModel = {};
     constructor(model: {agent?: any}){
         model = model
-        if('agent' in model){
-            this.setAgent(model.agent)
-        }
     }
 
     abstract ping(): Promise<boolean>
