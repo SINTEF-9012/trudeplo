@@ -3,6 +3,11 @@ types:
     _type: exec_env
     name: docker_engine
     port: 2375
+  ssh_env:
+    _type: exec_env
+    name: __user_name__
+    password: __password__ #need a seperate file...
+    port: 22
   linux_device:
     _type: device
     host: __local_ip__
@@ -26,6 +31,9 @@ types:
   docker_component:
     _from: software_artifact
     image: __image_tag__
+  ssh_script:
+    _from: software_artifact
+    cmd: __some_local_command__
 
 devices:
   my_local_machine:
@@ -38,7 +46,12 @@ devices:
     _from: rpi4
     host: 192.168.68.76
     id: raspberrypi
-    agent: ta_docker_arm64 #may not work due to arch mismatch
+    agent: ta_docker_arm64
+  my_local_rpi4_ssh:
+    _from: my_local_rpi4
+    execEnv:
+      _from: ssh_env
+    agent: nonta_ssh
 
 agents:
   ta_docker_amd64:
@@ -49,6 +62,9 @@ agents:
     _from: docker_component
     image: songhui/trust-agent:arm64
     localFile: ext/ta-arm64.tar.gz
+  nonta_ssh:
+    _from: ssh_script
+    cmd: "lsb_release -d"
 
     
 
