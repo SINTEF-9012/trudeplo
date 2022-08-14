@@ -5,7 +5,7 @@ types:
     port: 2375
   ssh_env:
     _type: exec_env
-    name: __user_name__
+    username: __user_name__
     password: __password__ #need a seperate file...
     port: 22
   linux_device:
@@ -26,6 +26,7 @@ types:
     _type: software
     url: __some_url__
     localFile: __some_local_file_path__
+    remoteFile: __name_of_file_in_device__
     developer: __some_developers_id__
     signature: __some_signature__
   docker_component:
@@ -34,6 +35,7 @@ types:
   ssh_script:
     _from: software_artifact
     cmd: __some_local_command__
+    cwd: __remote_working_folder
 
 devices:
   my_local_machine:
@@ -51,6 +53,8 @@ devices:
     _from: my_local_rpi4
     execEnv:
       _from: ssh_env
+      username: pi
+      password: raspberry
     agent: nonta_ssh
 
 agents:
@@ -64,7 +68,10 @@ agents:
     localFile: ext/ta-arm64.tar.gz
   nonta_ssh:
     _from: ssh_script
-    cmd: "lsb_release -d"
+    localFile: ext/hello/hello # for arm64v8 from: https://github.com/docker-library/hello-world/blob/master/arm64v8/hello-world/hello
+    remoteFile: hello
+    cmd: './hello'
+    cwd: /home/pi
 
     
 
