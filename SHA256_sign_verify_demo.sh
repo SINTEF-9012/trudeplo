@@ -1,3 +1,4 @@
+#integration, public key access 
 #generate key pair
 
 openssl ecparam -genkey -name secp384r1 > private_key.pem
