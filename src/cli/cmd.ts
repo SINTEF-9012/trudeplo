@@ -6,5 +6,6 @@ import {program} from "commander";
 program
     .name('cmd')
     .command('model', 'parsing and handling the user-provided models')
+    .command('device', 'work with devices')
     
 program.parse(process.argv)

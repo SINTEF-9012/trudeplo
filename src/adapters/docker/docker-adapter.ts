@@ -87,6 +87,11 @@ export class DockerAdapter extends AbstractAdapter{
         return ((await this.docker.ping()) as Buffer).toString() == 'OK'
     }
 
+    async info(): Promise<string> {
+        const version = await this.docker.version()
+        return `Docker Engine ${version.Version} on ${version.Arch} with ${version.Os}, API ${version.ApiVersion}`
+    }
+
 
     async deployArtefact(model: ArtifactModel){
         return this.createAndRunContainer(model)
@@ -199,5 +204,7 @@ export class DockerAdapter extends AbstractAdapter{
             return false
         }
     }
+
+
 
 }

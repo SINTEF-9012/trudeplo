@@ -1,11 +1,12 @@
+import { Agent } from "http";
 import { NodeSSH } from "node-ssh";
 import { AbstractAdapter } from "../abstract-adapter";
 
 export interface SshDevice{
-    host: string;
-    _agent: SshAgent;
+    host?: string;
+    _agent?: SshAgent;
     agent?: any;
-    execEnv: any;
+    execEnv?: any;
 }
 
 export interface SshAgent{
@@ -23,7 +24,7 @@ export class SshAdapter extends AbstractAdapter{
     constructor(device: SshDevice){
         super(device)
         this.ssh = new NodeSSH()
-        console.log(device)
+        // console.log(device)
         this.connPromise = this.ssh.connect({
             host: device.host,
             username: device['execEnv']['username'],
@@ -44,11 +45,18 @@ export class SshAdapter extends AbstractAdapter{
     ping(): Promise<boolean> {
         throw new Error("Method not implemented.");
     }
+
+    async info(): Promise<string> {
+        const conn = await this.getConn()
+        const result = await conn.execCommand('uname -a')
+        return result.stdout
+    }
+
     async loadAgent(): Promise<any>{
-        let conn = await this.getConn()
-        let agent = this.getAgent() as SshAgent
-        let result = await conn.putFile(agent.localFile, `${agent.cwd}/${agent.remoteFile}`)
-        let chmod = await conn.execCommand(
+        const conn = await this.getConn()
+        const agent = this.getAgent() as SshAgent
+        const result = await conn.putFile(agent.localFile, `${agent.cwd}/${agent.remoteFile}`)
+        const chmod = await conn.execCommand(
             `chmod a+x ./${agent.remoteFile}`,
             {cwd:agent.cwd}
         )

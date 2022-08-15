@@ -1,8 +1,7 @@
-import { DateTime } from "neo4j-driver";
-
 export interface BasicDeviceModel {
-    _agent?: {};
+    _agent?: any;
     _lastSeen?: Date;
+    execEnv?: any;
 }
 
 export interface BasicArtifactModel{
@@ -16,6 +15,7 @@ export abstract class AbstractAdapter{
     }
 
     abstract ping(): Promise<boolean>
+    abstract info(): Promise<string>
 
     /**
      * assign an agent to the device
@@ -51,3 +51,4 @@ export abstract class AbstractAdapter{
     }
 
 }
+

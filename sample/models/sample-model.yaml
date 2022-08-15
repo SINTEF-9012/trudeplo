@@ -5,6 +5,7 @@ types:
     port: 2375
   ssh_env:
     _type: exec_env
+    name: ssh
     username: __user_name__
     password: __password__ #need a seperate file...
     port: 22
@@ -46,7 +47,7 @@ devices:
     agent: ta_docker_amd64 #This is normally assigned automatically
   my_local_rpi4:
     _from: rpi4
-    host: 192.168.68.76
+    host: 192.168.32.2 # remember to change according to the network
     id: raspberrypi
     agent: ta_docker_arm64
   my_local_rpi4_ssh:
