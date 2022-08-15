@@ -1,4 +1,4 @@
-#integration, public key access 
+#integration, dummy DLT for public key, file+sig + public key from DLT: verification 
 #generate key pair
 
 openssl ecparam -genkey -name secp384r1 > private_key.pem
