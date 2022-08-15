@@ -17,4 +17,14 @@ openssl dgst -sha256 -verify public_key.pem -signature testkeypair.sig TestAgent
 #Verified OK
 
 #COSIGN 
-#generate certicates
+#cosign generate-key-pair
+#cosign sign --key cosign.key user/demo
+#cosign sign --key cosign.key TestAgent.txt
+#cosign sign --key=cosign.key $COSIGN_BLOG_IMAGE/$COSIGN_BLOG_TAG
+#cosign triangulate ${{COSIGN_BLOG_IMAGE}}/${{COSIGN_BLOG_TAG}}
+#cosign verify --key=cosign.pub $COSIGN_BLOG_IMAGE:$COSIGN_BLOG_TAG
+
+# submit signature for & signing cert to REKOR
+# print inclusion proof
+# delete private key 
+
