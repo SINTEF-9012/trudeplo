@@ -34,7 +34,7 @@ program
         }
         const adapter = createAdapter(device)
 
-        let info = await adapter.info()
+        let info = await adapter._info()
         console.log(info)
     });
 

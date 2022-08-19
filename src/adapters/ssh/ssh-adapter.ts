@@ -46,7 +46,7 @@ export class SshAdapter extends AbstractAdapter{
         throw new Error("Method not implemented.");
     }
 
-    async info(): Promise<string> {
+    async _info(): Promise<string> {
         const conn = await this.getConn()
         const result = await conn.execCommand('uname -a')
         return result.stdout

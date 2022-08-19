@@ -87,7 +87,7 @@ export class DockerAdapter extends AbstractAdapter{
         return ((await this.docker.ping()) as Buffer).toString() == 'OK'
     }
 
-    async info(): Promise<string> {
+    async _info(): Promise<string> {
         const version = await this.docker.version()
         return `Docker Engine ${version.Version} on ${version.Arch} with ${version.Os}, API ${version.ApiVersion}`
     }

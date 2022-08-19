@@ -1,8 +1,18 @@
+
+
 export interface BasicDeviceModel {
     _agent?: any;
-    _lastSeen?: Date;
+    lastSeen?: Date;
     execEnv?: any;
+    agent?: any;
+    lastOperation?: 'ping' | 'info' | 'load_agent' | 'start_agent' | 'stop_agent';
+    lastTried?: Date;
+    latestFailMessage?: string;
+    latestState?: 'running' | 'disconnected';
+    info?: string
 }
+
+
 
 export interface BasicArtifactModel{
     _instance?: any;
@@ -11,11 +21,31 @@ export interface BasicArtifactModel{
 export abstract class AbstractAdapter{
     model: BasicDeviceModel = {};
     constructor(model: {agent?: any}){
-        model = model
+        this.model = model
     }
 
     abstract ping(): Promise<boolean>
-    abstract info(): Promise<string>
+    abstract _info(): Promise<string>
+
+    async info(){
+        let model = this.getModel()
+        model.lastOperation = 'info';
+        model.lastTried = new Date();
+        console.log(`Try to get info from ${(this.getModel() as any)['id']}`)
+        try{
+            let result = await this._info();
+            model.info = result;
+            model.lastSeen = new Date();
+            return result;
+        }
+        catch(e: any){
+            console.log(e)
+            model.latestFailMessage = e.toString()
+            return 'not connected'
+        }
+
+    }
+
 
     /**
      * assign an agent to the device
@@ -48,6 +78,16 @@ export abstract class AbstractAdapter{
 
     getModel(){
         return this.model
+    }
+
+    getModelString(space?: string){
+        let model = this.getModel()
+        if(space){
+            return JSON.stringify(model, null, space)
+        }
+        else{
+            return JSON.stringify(model)
+        }
     }
 
 }
