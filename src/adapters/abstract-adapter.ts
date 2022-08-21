@@ -46,7 +46,6 @@ export abstract class AbstractAdapter{
 
     }
 
-
     /**
      * assign an agent to the device
      * @param agent 

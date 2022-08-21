@@ -41,5 +41,4 @@ export class DittoConnector{
         return this.client.publish(topic, device.getModelString(' '))
     }
 
-
 }
