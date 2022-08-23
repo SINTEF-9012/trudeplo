@@ -1,5 +1,6 @@
 # trudeplo
-Trustworthy deployment for critical components on Edge devices
+Trustworthy deployment for critical components on Edge  devices
+
 
 # Quickest start
 One command to load the sample model and start uploading the device information every minute:
