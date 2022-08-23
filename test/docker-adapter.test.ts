@@ -8,7 +8,7 @@ describe.skip("toy tests",  ()=>{
     // Not working under WSL
     it("Create docker adapter, and ping it with success", async ()=>{
         const docker = new DockerAdapter({host:'localhost'})
-        let result = await docker.ping()
+        let result = await docker._ping()
         
         expect(result).toEqual(true)
     })
@@ -30,7 +30,7 @@ describe.skip("toy tests",  ()=>{
         let model = loadFromYaml('sample/models/sample-model.yaml')
         let device = model['devices']['my_local_machine']
         const adapter: AbstractAdapter = new DockerAdapter(device)
-        expect(adapter.ping()).toBeTruthy()
+        expect(adapter._ping()).toBeTruthy()
 
         adapter.setAgent(model['agents']['ta_docker_amd64'])
         let afterload = await adapter.loadAgent()
@@ -45,7 +45,7 @@ describe.skip("toy tests",  ()=>{
         let device = model['devices']['my_local_rpi4']
         
         const adapter: AbstractAdapter = new DockerAdapter(device)
-        expect(adapter.ping()).toBeTruthy()
+        expect(adapter._ping()).toBeTruthy()
         
         let agentName = device['agent']
         adapter.setAgent(model['agents'][agentName])

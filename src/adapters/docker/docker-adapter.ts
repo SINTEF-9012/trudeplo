@@ -30,10 +30,6 @@ export class DockerAdapter extends AbstractAdapter{
         this.docker = new Docker({protocol:'http', host:host, port:2375 });
     }
 
-    getModel(){
-        return this.model as {host: string, _agent: any}
-    }
-
     async loadAgent() {
         let elem = this.getModel()
         if(!elem['_agent']){
@@ -83,12 +79,13 @@ export class DockerAdapter extends AbstractAdapter{
      * Check if the Docker Engine is online
      * @returns true (online) or false
      */
-    async ping(){
+    async _ping(){
         return ((await this.docker.ping()) as Buffer).toString() == 'OK'
     }
 
     async _info(): Promise<string> {
         const version = await this.docker.version()
+        this.getModel().arch = version.Arch
         return `Docker Engine ${version.Version} on ${version.Arch} with ${version.Os}, API ${version.ApiVersion}`
     }
 
@@ -204,7 +201,5 @@ export class DockerAdapter extends AbstractAdapter{
             return false
         }
     }
-
-
 
 }

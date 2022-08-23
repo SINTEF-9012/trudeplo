@@ -27,7 +27,7 @@ export class ProcessAdapter extends AbstractAdapter{
         }
     }
 
-    async ping(): Promise<boolean> {
+    async _ping(): Promise<boolean> {
         let path = this.getWorkingPath()
         return fs.existsSync(path)
     }

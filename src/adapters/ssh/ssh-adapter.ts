@@ -42,14 +42,18 @@ export class SshAdapter extends AbstractAdapter{
         return this.conn
     }
 
-    ping(): Promise<boolean> {
-        throw new Error("Method not implemented.");
+    async _ping(): Promise<boolean> {
+        let result = await this._info()
+        return result.length > 0
     }
 
     async _info(): Promise<string> {
         const conn = await this.getConn()
         const result = await conn.execCommand('uname -a')
-        return result.stdout
+        const info = result.stdout
+        const infoArray = info.split(' ')
+        this.getModel().arch = infoArray[infoArray.length-2]
+        return info
     }
 
     async loadAgent(): Promise<any>{

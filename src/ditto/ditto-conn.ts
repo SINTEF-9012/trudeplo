@@ -1,6 +1,9 @@
 import { AbstractAdapter } from "../adapters/abstract-adapter"
 import * as mqtt from "async-mqtt"
 import { createAdapter } from "../adapters/adapter-factory";
+import { TIMEOUT } from "dns";
+import wait from 'wait'
+import { watch } from "fs";
 
 export interface MqttConnInfo {
     host: string;
@@ -24,9 +27,16 @@ export class DittoConnector{
 
     }
 
+    async startHeartBeatForAll(){
+        Object.values(this.adapters).forEach(async (adapter)=>{
+            this.heartbeat(adapter)
+        })
+        console.log('heart beat started')
+    }
+
     async updateAllDeviceInfo(){
         let results = Object.values(this.adapters).map(async (adapter) => {
-            let info = await adapter.info()
+            let info = await adapter.launchOperation('info')
             await this.pubDevice(adapter)
             return info
         })
@@ -39,6 +49,20 @@ export class DittoConnector{
     async pubDevice(device: AbstractAdapter){
         let topic = `${this.connInfo.rootTopic}/device`
         return this.client.publish(topic, device.getModelString(' '))
+    }
+
+    async heartbeat(adapter: AbstractAdapter){
+        let device = adapter.getModel();
+        let state = device.latestState;
+        if(state == 'created'){
+            await(adapter.launchOperation('info'))
+        }
+        else{
+            await(adapter.launchOperation('ping'))
+        }
+        await this.pubDevice(adapter)
+        await wait(60 * 1000) //wait a minute
+        this.heartbeat(adapter)
     }
 
 }

@@ -1,18 +1,21 @@
 
 
+type OperationName = 'ping' | 'info' | 'load_agent' | 'start_agent' | 'stop_agent';
+
+type DeviceState = 'created' | 'connected' | 'disconnected';
+
 export interface BasicDeviceModel {
     _agent?: any;
     lastSeen?: Date;
     execEnv?: any;
     agent?: any;
-    lastOperation?: 'ping' | 'info' | 'load_agent' | 'start_agent' | 'stop_agent';
+    lastOperation?: OperationName;
     lastTried?: Date;
     latestFailMessage?: string;
-    latestState?: 'running' | 'disconnected';
-    info?: string
+    latestState?: DeviceState;
+    info?: string;
+    arch?: string;
 }
-
-
 
 export interface BasicArtifactModel{
     _instance?: any;
@@ -22,29 +25,42 @@ export abstract class AbstractAdapter{
     model: BasicDeviceModel = {};
     constructor(model: {agent?: any}){
         this.model = model
+        this.model.latestState = 'created'
     }
 
-    abstract ping(): Promise<boolean>
+    abstract _ping(): Promise<boolean>
     abstract _info(): Promise<string>
 
-    async info(){
+    async launchOperation(operation: OperationName){
         let model = this.getModel()
-        model.lastOperation = 'info';
+        model.lastOperation = operation;
         model.lastTried = new Date();
-        console.log(`Try to get info from ${(this.getModel() as any)['id']}`)
         try{
-            let result = await this._info();
-            model.info = result;
+            let result: any = undefined
+            switch(operation){
+                case 'info': {
+                    result = await this._info();
+                    model.info = result;
+                }
+                case 'ping': {
+                    result = await this._ping();
+                }
+            }
+            
             model.lastSeen = new Date();
+            model.latestState = 'connected'
             return result;
         }
         catch(e: any){
             console.log(e)
             model.latestFailMessage = e.toString()
+            model.latestState = 'disconnected'
             return 'not connected'
         }
 
     }
+
+    
 
     /**
      * assign an agent to the device
