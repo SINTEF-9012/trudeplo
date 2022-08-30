@@ -7,6 +7,6 @@ describe("test ditto",  ()=>{
             host: 'tcp://test.mosquitto.org:1883',
             rootTopic: 'trudeplo'
         });
-        await dtConn.heartbeat()
+        await dtConn.startHeartBeatForAll()
     })
 })

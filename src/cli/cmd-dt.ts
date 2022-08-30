@@ -20,7 +20,7 @@ program
     })
 
 program
-    .command('hb')
+    .command('heartbeat')
     .description('load model from local yaml file, create adapters, and publish them to ditto')
     .option('-m, --model <string>', 'initial model in yaml file', 'sample/models/sample-model.yaml')
     .action(async (options)=>{

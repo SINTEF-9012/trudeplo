@@ -13,7 +13,7 @@ types:
     _type: device
     host: __local_ip__
     id: __some_uid__
-    arch: __amd64_arm64_arm_arm64
+    arch: __amd64_arm64_arm_arm64v8
   laptop:
     arch: x86-64
     execEnv:
