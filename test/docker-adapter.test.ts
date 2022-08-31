@@ -4,7 +4,7 @@ import { loadFromYaml } from "../src/model/model-handler"
 import { streamToString } from "../src/util/stream"
 
 
-describe.skip("toy tests",  ()=>{
+describe("toy tests",  ()=>{
     // Not working under WSL
     it("Create docker adapter, and ping it with success", async ()=>{
         const docker = new DockerAdapter({host:'localhost'})
@@ -34,13 +34,13 @@ describe.skip("toy tests",  ()=>{
 
         adapter.setAgent(model['agents']['ta_docker_amd64'])
         let afterload = await adapter.loadAgent()
-        expect(afterload.image).toEqual('songhui/trust-agent:latest')
+        expect(afterload).toEqual(true)
         
         let afterrun = await adapter.runAgent()
         // console.log(afterrun)
         expect(await adapter.isAgentRunning()).toEqual(true)
     })
-    it.only("try to deploy on raspberry pi 4", async ()=>{
+    it("try to deploy on raspberry pi 4", async ()=>{
         let model = loadFromYaml('sample/models/sample-model.yaml')
         let device = model['devices']['my_local_rpi4']
         
@@ -65,6 +65,30 @@ describe.skip("toy tests",  ()=>{
     it.skip("try to inspect container", async() =>{
         const docker = new DockerAdapter({host: 'localhost'})
         await docker.isAgentRunning()
+    })
+    it.only("receive a twin", async()=>{
+        let model = loadFromYaml('sample/models/sample-model.yaml')
+        let device = model['devices']['my_local_machine']
+
+        const adapter: AbstractAdapter = new DockerAdapter(device)
+        let info = await adapter.launchOperation('info')
+        let upstream = adapter.getTwinModel()
+        let downstream = {
+            ...upstream,
+            features:{
+                ...upstream.features,
+                agent:{
+                    desiredProperties:{
+                        ...model['agents']['ta_docker_amd64'],
+                        status: 'running'
+                    }
+                }
+            }
+        }
+        let result = await adapter.receiveTwin(downstream)
+        let updstream2 = adapter.getTwinModel()
+        console.log(adapter.getTwinString(' '))
+        expect(updstream2.features.agent.properties.status).toEqual('running')
     })
 })
 

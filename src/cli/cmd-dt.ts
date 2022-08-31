@@ -33,4 +33,14 @@ program
         await dtConn.startHeartBeatForAll()
     })
 
+program
+    .command('sub')
+    .action(async ()=>{
+        let dtConn = new DittoConnector({
+            host: 'tcp://test.mosquitto.org:1883',
+            rootTopic: 'trudeplo'
+        });
+        await dtConn.startSubDownstream()
+    })
+
 program.parse(process.argv)

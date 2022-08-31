@@ -12,7 +12,7 @@ types:
   linux_device:
     _type: device
     host: __local_ip__
-    id: __some_uid__
+    thingId: __some_uid__
     arch: __amd64_arm64_arm_arm64v8
   laptop:
     arch: x86-64
@@ -42,17 +42,16 @@ devices:
   my_local_machine:
     _from: laptop
     host: localhost
-    id: SINTEF9977
-    lastSeen:  2022-06-07T07:37:13Z
+    thingId: no.sintef.sct.giot:SINTEF9977
     agent: ta_docker_amd64 #This is normally assigned automatically
   my_local_rpi4:
     _from: rpi4
     host: 192.168.32.2 # remember to change according to the network
-    id: raspberrypi_1
+    thingId: no.sintef.sct.giot:raspberrypi_1
     agent: ta_docker_arm64
   my_local_rpi4_ssh:
     _from: my_local_rpi4
-    id: raspberrypi_1_ssh
+    thingId: no.sintef.sct.giot:raspberrypi_1_ssh
     execEnv:
       _from: ssh_env
       username: pi

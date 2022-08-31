@@ -1,31 +1,37 @@
 
 
-type OperationName = 'ping' | 'info' | 'load_agent' | 'start_agent' | 'stop_agent';
-
+type OperationName = 'ping' | 'info' | 'load_agent' | 'start_agent' | 'stop_agent' | 'ping_agent';
 type DeviceState = 'created' | 'connected' | 'disconnected';
+type AgentStatus = 'unloaded' | 'running' | 'stopped';
 
 export interface BasicDeviceModel {
+    thingId?: string;
     _agent?: any;
-    lastSeen?: Date;
     execEnv?: any;
     agent?: any;
-    lastOperation?: OperationName;
-    lastTried?: Date;
-    latestFailMessage?: string;
-    latestState?: DeviceState;
-    info?: string;
-    arch?: string;
+    meta:{
+        lastOperation?: OperationName;
+        lastTried?: Date;
+        latestFailMessage?: string;
+        latestState?: DeviceState;
+        lastSeen?: Date;
+    };
+    attribute:{
+        info?: string;
+        arch?: string;
+    };
 }
 
 export interface BasicArtifactModel{
     _instance?: any;
+    status?: AgentStatus;
 }
 
 export abstract class AbstractAdapter{
-    model: BasicDeviceModel = {};
+    model: BasicDeviceModel
     constructor(model: {agent?: any}){
-        this.model = model
-        this.model.latestState = 'created'
+        this.model = {...model, meta:{}, attribute:{}}
+        this.model.meta.latestState = 'created'
     }
 
     abstract _ping(): Promise<boolean>
@@ -33,28 +39,47 @@ export abstract class AbstractAdapter{
 
     async launchOperation(operation: OperationName){
         let model = this.getModel()
-        model.lastOperation = operation;
-        model.lastTried = new Date();
+        model.meta.lastOperation = operation;
+        model.meta.lastTried = new Date();
         try{
             let result: any = undefined
             switch(operation){
                 case 'info': {
                     result = await this._info();
-                    model.info = result;
+                    model.attribute.info = result;
+                    break;
                 }
                 case 'ping': {
                     result = await this._ping();
+                    break;
+                }
+                case 'load_agent': {
+                    result = await this.loadAgent();
+                    break;
+                }
+                case 'start_agent': {
+                    result = await this.runAgent();
+                    break;
+                }
+                case 'stop_agent':{
+                    result = await this.stopAgent();
+                    break;
+                }
+                case 'ping_agent':{
+                    result = await this.isAgentRunning();
+                    break;
                 }
             }
             
-            model.lastSeen = new Date();
-            model.latestState = 'connected'
+            model.meta.lastSeen = new Date();
+            model.meta.latestState = 'connected'
+            model.meta.latestFailMessage = undefined
             return result;
         }
         catch(e: any){
             console.log(e)
-            model.latestFailMessage = e.toString()
-            model.latestState = 'disconnected'
+            model.meta.latestFailMessage = e.toString()
+            model.meta.latestState = 'disconnected'
             return 'not connected'
         }
 
@@ -67,7 +92,8 @@ export abstract class AbstractAdapter{
      * @param agent 
      */
     setAgent(agent:{}){
-        this.model['_agent'] = agent
+        this.model['_agent'] = {...agent, status:'unloaded'}
+
     }
 
     getAgent(){
@@ -95,8 +121,27 @@ export abstract class AbstractAdapter{
         return this.model
     }
 
-    getModelString(space?: string){
+    getTwinModel(){
         let model = this.getModel()
+        return {
+            thingId: model.thingId,
+            attributes: model.attribute,
+            features:{
+                execEnv:{
+                    properties: model.execEnv
+                },
+                agent:{
+                    properties: model._agent
+                },
+                meta:{
+                    properties: model.meta
+                }
+            }
+        }
+    }
+
+    getTwinString(space?: string){
+        let model = this.getTwinModel()
         if(space){
             return JSON.stringify(model, null, space)
         }
@@ -105,5 +150,47 @@ export abstract class AbstractAdapter{
         }
     }
 
+    /**
+     * Update local device based on the received digital twin
+     * Only support "adding an agent" at the moment
+     * @param twin 
+     */
+    async receiveTwin(twin: any){
+        if(twin.features.agent && twin.features.agent.desiredProperties)
+            await this.updateAgentFromTwin(
+                twin.features.agent.desiredProperties
+            );
+    }
+
+    private async updateAgentFromTwin(desiredAgent: any) {
+        let currentAgent = this.getAgent();
+        if (!currentAgent) {
+            this.setAgent(desiredAgent); //status will be set to 'unloaded'
+            currentAgent = this.getAgent();
+        }
+        else if (
+            (currentAgent.url != desiredAgent.url) ||
+            (currentAgent.signature != desiredAgent.signature)
+        ) { //when a different agent was required
+            currentAgent.status = 'unloaded';
+        }
+
+        if (currentAgent.status == 'unloaded'
+            && (desiredAgent.status == 'stopped'
+                || desiredAgent.status == 'running')) {
+            await this.launchOperation('load_agent');
+            currentAgent = this.getAgent();
+        }
+        if (currentAgent.status == 'stopped' && desiredAgent.status == 'running') {
+            await this.launchOperation('start_agent');
+            await this.isAgentRunning();
+            currentAgent = this.getAgent();
+        }
+        if (currentAgent.status == 'running' && desiredAgent.status == 'stopped') {
+            await this.launchOperation('stop_agent');
+            await this.isAgentRunning();
+            currentAgent = this.getAgent();
+        }
+    }
 }
 
