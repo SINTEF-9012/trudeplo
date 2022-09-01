@@ -21,7 +21,11 @@ export class DittoConnector{
 
     loadLocalModels(deviceModels: {[key:string]: any}){
         Object.keys(deviceModels).forEach(key =>{
-            this.adapters[key] = createAdapter(deviceModels[key])   
+            let device = deviceModels[key];
+            let adapter = createAdapter(device); 
+            this.adapters[key] =  adapter;
+            if(device.thingId)
+                this.adaptersByThingId[device.thingId] = adapter;
         })
         console.log(Object.keys(this.adapters))
 
@@ -67,11 +71,27 @@ export class DittoConnector{
 
     async startSubDownstream(){
         await this.client.subscribe(`${this.connInfo.rootTopic}/downstream`)
-        this.client.on('message', (topic, payload, packet)=>{
-            console.log(topic)
-            console.log(payload.toString())
-            console.log(packet.payload.toString())
+        this.client.on('message', async (topic, payload, packet)=>{
+            if(topic == `${this.connInfo.rootTopic}/downstream`){
+                let model = JSON.parse(payload.toString());
+                let adapter = this.locateAdapter(model)
+                await adapter.receiveTwin(model)
+            }
         })
+    }
+
+    private locateAdapter(model: any){
+        const downId = model.thingId;
+        if(downId in this.adaptersByThingId)
+            return this.adaptersByThingId[downId]
+        // Thinking about other ways to match existing adapters
+        let adapter = createAdapter({
+            thingId: downId,
+            meta: {},
+            attribute: {},
+            execEnv: model.features.execEnv.properties
+        })
+        return adapter
     }
 
 }
