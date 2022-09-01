@@ -65,7 +65,7 @@ export class DittoConnector{
             await(adapter.launchOperation('ping'))
         }
         await this.pubDevice(adapter)
-        await wait(60 * 1000) //wait a minute
+        await wait(20 * 1000) //wait a minute (20 seconds for testing purpose)
         this.heartbeat(adapter)
     }
 
@@ -73,6 +73,7 @@ export class DittoConnector{
         await this.client.subscribe(`${this.connInfo.rootTopic}/downstream`)
         this.client.on('message', async (topic, payload, packet)=>{
             if(topic == `${this.connInfo.rootTopic}/downstream`){
+                console.log(payload.toString())
                 let model = JSON.parse(payload.toString());
                 let adapter = this.locateAdapter(model)
                 await adapter.receiveTwin(model)

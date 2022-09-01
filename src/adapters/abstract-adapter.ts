@@ -1,5 +1,3 @@
-
-
 type OperationName = 'ping' | 'info' | 'load_agent' | 'start_agent' | 'stop_agent' | 'ping_agent';
 type DeviceState = 'created' | 'connected' | 'disconnected';
 type AgentStatus = 'unloaded' | 'running' | 'stopped';
@@ -38,6 +36,7 @@ export abstract class AbstractAdapter{
     abstract _info(): Promise<string>
 
     async launchOperation(operation: OperationName){
+        console.log(`launch operation "${operation}"`)
         let model = this.getModel()
         model.meta.lastOperation = operation;
         model.meta.lastTried = new Date();
