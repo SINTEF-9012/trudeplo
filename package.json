@@ -11,7 +11,8 @@
   },
   "scripts": {
     "start": "node -r ts-node/register src/cli/cmd.ts",
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc --build"
   },
   "devDependencies": {
     "@babel/core": "^7.18.10",
