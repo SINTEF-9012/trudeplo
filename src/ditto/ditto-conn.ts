@@ -51,7 +51,7 @@ export class DittoConnector{
     }
 
     async pubDevice(device: AbstractAdapter){
-        let topic = `${this.connInfo.rootTopic}/device`
+        let topic = `${this.connInfo.rootTopic}/upstream`
         return this.client.publish(topic, device.getTwinString(' '))
     }
 

@@ -35,24 +35,29 @@ export class ProcessAdapter extends AbstractAdapter{
     async _info(): Promise<string> {
         return `${process.title} ${process.version} at ${process.platform} on ${process.arch}. Working path: ${this.getWorkingPath()}`
     }
+
     async loadAgent(): Promise<any> {
         let filePath = this.getFilePath()
         fs.writeFileSync(filePath, '')
         return this.getAgent()
     }
+
     async runAgent(): Promise<any> {
         let filePath = this.getFilePath()
         fs.writeFileSync(filePath, 'running')
         return this.getAgent()
     }
+
     async stopAgent(): Promise<any> {
         let filePath = this.getFilePath()
         fs.writeFileSync(filePath, 'stopped')
         return this.getAgent()
     }
+
     async isAgentRunning(): Promise<boolean> {
         let filePath = this.getFilePath()
         let content = fs.readFileSync(filePath, 'utf-8')
         return content == 'running';
     }
+    
 }

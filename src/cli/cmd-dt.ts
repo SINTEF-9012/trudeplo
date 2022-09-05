@@ -51,7 +51,7 @@ program
         let model = loadFromYaml(options.model)
         let dtConn = new DittoConnector({
             host: 'tcp://test.mosquitto.org:1883',
-            rootTopic: 'trudeplo'
+            rootTopic: 'no.sintef.sct.giot.things'
         });
         dtConn.loadLocalModels(model.devices)
         dtConn.startSubDownstream()

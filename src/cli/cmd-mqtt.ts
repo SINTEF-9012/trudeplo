@@ -10,9 +10,9 @@ program
     .command('start')
     .action(async (options)=>{
         const client = mqtt.connect('tcp://test.mosquitto.org:1883')
-        let result = client.subscribe('trudeplo/device')
+        let result = client.subscribe('no.sintef.sct.giot.things/upstream')
         client.on('message', async (topic, payload, packet)=>{
-            if(topic == 'trudeplo/device'){
+            if(topic == 'no.sintef.sct.giot.things/upstream'){
                 let model = JSON.parse(payload.toString())
                 if(model.thingId == 'no.sintef.sct.giot:SINTEF9977'){
                     console.log(JSON.stringify(model, null, ' '))
@@ -34,7 +34,7 @@ program
                             model.features.agent = {}
                         }
                         model.features.agent.desiredProperties = desired
-                        await client.publish('trudeplo/downstream', JSON.stringify(model))
+                        await client.publish('no.sintef.sct.giot.things/downstream', JSON.stringify(model))
                         
                         console.log('response sent')
                     }
@@ -43,7 +43,7 @@ program
                         let desired = {...model.features.agent.properties}
                         desired.status = 'stopped'
                         model.features.agent.desiredProperties = desired;
-                        await client.publish('trudeplo/downstream', JSON.stringify(model))
+                        await client.publish('no.sintef.sct.giot.things/downstream', JSON.stringify(model))
                         console.log('response sent')
                     }
                     

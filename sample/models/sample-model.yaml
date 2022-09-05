@@ -9,6 +9,9 @@ types:
     username: __user_name__
     password: __password__ #need a seperate file...
     port: 22
+  mock_env:
+    _type: exec_env
+    name: mock
   linux_device:
     _type: device
     host: __local_ip__
@@ -57,6 +60,12 @@ devices:
       username: pi
       password: raspberry
     agent: nonta_ssh
+  my_local_mockup:
+    host: mockup
+    thingId: no.sintef.sct.giot:mockupdevice
+    execEnv:
+      _from: mock_env
+
 
 agents:
   ta_docker_amd64:
@@ -73,6 +82,9 @@ agents:
     remoteFile: hello
     cmd: './hello'
     cwd: /home/pi
+  mockup_agent:
+    _from: software_artifact
+    remoteFile: mockupAgent
 
     
 

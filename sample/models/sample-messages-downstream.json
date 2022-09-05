@@ -1,0 +1,32 @@
+{
+    "thingId": "no.sintef.sct.giot:SINTEF9977",
+    "attributes": {
+        "arch": "amd64",
+        "info": "Docker Engine 20.10.17 on amd64 with linux, API 1.41"
+    },
+    "features": {
+        "execEnv": {
+            "properties": {
+                "_type": "exec_env",
+                "name": "docker_engine",
+                "port": 2375
+            }
+        },
+        "agent": {
+            "desiredProperties": {
+                "localFile": "ext/trust-agent-image.tar.gz",
+                "image": "songhui/trust-agent:latest",
+                "status": "running",
+                "name": "trust_agent"
+            }
+        },
+        "meta": {
+            "properties": {
+                "latestState": "connected",
+                "lastOperation": "ping",
+                "lastTried": "2022-09-05T11:57:35.006Z",
+                "lastSeen": "2022-09-05T11:57:35.038Z"
+            }
+        }
+    }
+}
