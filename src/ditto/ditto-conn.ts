@@ -92,8 +92,9 @@ export class DittoConnector{
         // Thinking about other ways to match existing adapters
         let adapter = createAdapter({
             thingId: downId,
-            meta: {},
+            host: model.attributes.host,
             attribute: {},
+            meta: {},
             execEnv: model.features.execEnv.properties
         })
         this.heartbeat(adapter)
