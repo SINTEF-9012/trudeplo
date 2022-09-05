@@ -1,6 +1,7 @@
 import { program } from "commander";
 import * as mqtt from "async-mqtt";
 import prompts from 'prompts';
+import { loadFromYaml } from "../model/model-handler";
 
 program
     .name('mqtt')
@@ -10,8 +11,33 @@ program
     .command('start')
     .action(async (options)=>{
         const client = mqtt.connect('tcp://test.mosquitto.org:1883')
-        let result = client.subscribe('no.sintef.sct.giot.things/upstream')
+        let result = await client.subscribe('no.sintef.sct.giot.things/upstream')
+        let result2 = await client.subscribe('no.sintef.sct.giot.things/request')
         client.on('message', async (topic, payload, packet)=>{
+            if(topic == 'no.sintef.sct.giot.things/request'){
+                let message = payload.toString()
+                if(message == 'FetchAll'){
+                    console.log('Sending downstream device models...');
+                    let model = loadFromYaml('sample/models/sample-model.yaml')
+                    Object.values(model.devices).forEach( (dev: any) =>{
+                        let payload = {
+                            thingId: dev.thingId,
+                            attributes: {
+                                host: dev.host,
+                                arch: dev.arch
+                            },
+                            features:{
+                                execEnv:{
+                                    properties: dev.execEnv
+                                },
+                                agent:{},
+                                meta:{}
+                            }
+                        }
+                        client.publish('no.sintef.sct.giot.things/downstream', JSON.stringify(payload))
+                    })
+                }
+            }
             if(topic == 'no.sintef.sct.giot.things/upstream'){
                 let model = JSON.parse(payload.toString())
                 if(model.thingId == 'no.sintef.sct.giot:SINTEF9977'){
