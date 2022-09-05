@@ -37,23 +37,23 @@ export class DockerAdapter extends AbstractAdapter{
         }
         let response = await this.loadImage(elem._agent)
         if(response){
-            elem._agent['image'] = response
-            elem._agent['loaded'] = true
+            elem._agent['image'] = response          
+            elem._agent['status'] = 'stopped'
+            return true
         }
-        return elem._agent
+        return false
     }
     async runAgent() {
         let elem = this.getModel()
         if(!elem['_agent']){
             throw new Error ('agent not assigned')
         }
-        if(!elem['_agent']['loaded']){
-            throw new Error ('load the agent first')
-        }
         let response = await this.createAndRunContainer(elem._agent)
         elem._agent = {
             ...elem._agent,
-            ...response
+            id: response.id,
+            name: response.name,
+            status: 'running'
         }
         
         return elem._agent
@@ -85,7 +85,7 @@ export class DockerAdapter extends AbstractAdapter{
 
     async _info(): Promise<string> {
         const version = await this.docker.version()
-        this.getModel().arch = version.Arch
+        this.getModel().attribute.arch = version.Arch
         return `Docker Engine ${version.Version} on ${version.Arch} with ${version.Os}, API ${version.ApiVersion}`
     }
 
@@ -119,7 +119,8 @@ export class DockerAdapter extends AbstractAdapter{
             name: name,
             Image: image
         })
-        await container.start()
+        let response = await container.start()
+        // console.log(streamToString(response))
         containerStub._instance = container
         containerStub.id = container.id
         return containerStub
@@ -148,8 +149,7 @@ export class DockerAdapter extends AbstractAdapter{
                 return response.substring(response.indexOf(':')+1).trim()
             }
             catch(e){
-                console.log(resultString)
-                return //not successfuly load any image. return undefined
+                throw Error(resultString)
             }
         }
     }
@@ -189,7 +189,16 @@ export class DockerAdapter extends AbstractAdapter{
         if(! agentModel){
             throw new Error ('agent not assigned')
         }
-        return (await this.isContainerRunning(agentModel) == true)
+        let isRunning = await this.isContainerRunning(agentModel);
+        if(isRunning){
+            this.getAgent().status = 'running'
+            return true
+        }
+        else{
+            this.getAgent().status = 'stopped'
+            return false
+        }
+
     }
 
     async isContainerRunning(model: {name?: string, id?: string}){

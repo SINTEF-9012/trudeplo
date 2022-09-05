@@ -1,7 +1,6 @@
 import { AbstractAdapter } from "../adapters/abstract-adapter"
 import * as mqtt from "async-mqtt"
 import { createAdapter } from "../adapters/adapter-factory";
-import { TIMEOUT } from "dns";
 import wait from 'wait'
 import { watch } from "fs";
 
@@ -12,6 +11,7 @@ export interface MqttConnInfo {
 
 export class DittoConnector{
     adapters: {[key:string]: AbstractAdapter} = {};
+    adaptersByThingId: {[key:string]: AbstractAdapter} = {};
     client: mqtt.AsyncClient;
     connInfo: MqttConnInfo;
     constructor(connInfo: MqttConnInfo){
@@ -21,7 +21,11 @@ export class DittoConnector{
 
     loadLocalModels(deviceModels: {[key:string]: any}){
         Object.keys(deviceModels).forEach(key =>{
-            this.adapters[key] = createAdapter(deviceModels[key])   
+            let device = deviceModels[key];
+            let adapter = createAdapter(device); 
+            this.adapters[key] =  adapter;
+            if(device.thingId)
+                this.adaptersByThingId[device.thingId] = adapter;
         })
         console.log(Object.keys(this.adapters))
 
@@ -48,12 +52,12 @@ export class DittoConnector{
 
     async pubDevice(device: AbstractAdapter){
         let topic = `${this.connInfo.rootTopic}/device`
-        return this.client.publish(topic, device.getModelString(' '))
+        return this.client.publish(topic, device.getTwinString(' '))
     }
 
     async heartbeat(adapter: AbstractAdapter){
         let device = adapter.getModel();
-        let state = device.latestState;
+        let state = device.meta.latestState;
         if(state == 'created'){
             await(adapter.launchOperation('info'))
         }
@@ -61,8 +65,34 @@ export class DittoConnector{
             await(adapter.launchOperation('ping'))
         }
         await this.pubDevice(adapter)
-        await wait(60 * 1000) //wait a minute
+        await wait(20 * 1000) //wait a minute (20 seconds for testing purpose)
         this.heartbeat(adapter)
+    }
+
+    async startSubDownstream(){
+        await this.client.subscribe(`${this.connInfo.rootTopic}/downstream`)
+        this.client.on('message', async (topic, payload, packet)=>{
+            if(topic == `${this.connInfo.rootTopic}/downstream`){
+                console.log(payload.toString())
+                let model = JSON.parse(payload.toString());
+                let adapter = this.locateAdapter(model)
+                await adapter.receiveTwin(model)
+            }
+        })
+    }
+
+    private locateAdapter(model: any){
+        const downId = model.thingId;
+        if(downId in this.adaptersByThingId)
+            return this.adaptersByThingId[downId]
+        // Thinking about other ways to match existing adapters
+        let adapter = createAdapter({
+            thingId: downId,
+            meta: {},
+            attribute: {},
+            execEnv: model.features.execEnv.properties
+        })
+        return adapter
     }
 
 }

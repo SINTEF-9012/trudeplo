@@ -33,4 +33,29 @@ program
         await dtConn.startHeartBeatForAll()
     })
 
+program
+    .command('sub')
+    .action(async ()=>{
+        let dtConn = new DittoConnector({
+            host: 'tcp://test.mosquitto.org:1883',
+            rootTopic: 'trudeplo'
+        });
+        await dtConn.startSubDownstream()
+    })
+
+    program
+    .command('all')
+    .description('load model from local yaml file, start heart beat and listen to downstream')
+    .option('-m, --model <string>', 'initial model in yaml file', 'sample/models/sample-model.yaml')
+    .action(async (options)=>{
+        let model = loadFromYaml(options.model)
+        let dtConn = new DittoConnector({
+            host: 'tcp://test.mosquitto.org:1883',
+            rootTopic: 'trudeplo'
+        });
+        dtConn.loadLocalModels(model.devices)
+        dtConn.startSubDownstream()
+        await dtConn.startHeartBeatForAll()
+    })
+
 program.parse(process.argv)
