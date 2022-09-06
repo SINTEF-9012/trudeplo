@@ -17,4 +17,4 @@ export COSIGN_SIGN_REPO=/mnt/c/Users/shukunt/git/trudeplo/SignVerifyContainers/S
 #cosign verify-blob --key $COSIGN_PUBLIC_KEY_FILE/cosign2.pub --signature MEUCIQCCjwVXXBDnQJJedrOc4CMrurW46AAdU4EbQZdMfzAyzgIge5xawWIII0qQjFRuuaf4/gxyuQFsj0EbV35TeLYTLRc= TestAgent1.txt
 cosign verify-blob --key $COSIGN_PUBLIC_KEY_FILE/cosign2.pub --signature $COSIGN_SIGN_REPO/blob.sig TestAgent2.txt
 #cosign verify-blob --key /mnt/c/Users/shukunt/git/trudeplo/SignVerifyContainers/dummyDLT/cosign2.pub --signature MEUCIQCCjwVXXBDnQJJedrOc4CMrurW46AAdU4EbQZdMfzAyzgIge5xawWIII0qQjFRuuaf4/gxyuQFsj0EbV35TeLYTLRc= TestAgent1.txt
-echo "NOTE: Signature hardocoded, but image verified" 
+#echo "NOTE: Signature hardocoded, but image verified" 
