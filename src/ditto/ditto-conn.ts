@@ -31,6 +31,10 @@ export class DittoConnector{
 
     }
 
+    async requestTwins(){
+        return await this.client.publish(`${this.connInfo.rootTopic}/request`, 'FetchAll');
+    }
+
     async startHeartBeatForAll(){
         Object.values(this.adapters).forEach(async (adapter)=>{
             this.heartbeat(adapter)
@@ -88,10 +92,14 @@ export class DittoConnector{
         // Thinking about other ways to match existing adapters
         let adapter = createAdapter({
             thingId: downId,
-            meta: {},
+            host: model.attributes.host,
             attribute: {},
+            meta: {},
             execEnv: model.features.execEnv.properties
         })
+        this.heartbeat(adapter)
+        this.adapters[downId] = adapter;
+        this.adaptersByThingId[downId] = adapter;
         return adapter
     }
 

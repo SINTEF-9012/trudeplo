@@ -7,6 +7,7 @@ export interface BasicDeviceModel {
     _agent?: any;
     execEnv?: any;
     agent?: any;
+    host?: string;
     meta:{
         lastOperation?: OperationName;
         lastTried?: Date;
