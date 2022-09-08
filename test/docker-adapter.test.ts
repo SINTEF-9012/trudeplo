@@ -4,7 +4,7 @@ import { loadFromYaml } from "../src/model/model-handler"
 import { streamToString } from "../src/util/stream"
 
 
-describe("toy tests",  ()=>{
+describe.skip("toy tests",  ()=>{
     // Not working under WSL
     it("Create docker adapter, and ping it with success", async ()=>{
         const docker = new DockerAdapter({host:'localhost'})

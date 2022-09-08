@@ -40,7 +40,7 @@ program
             }
             if(topic == 'no.sintef.sct.giot.things/upstream'){
                 let model = JSON.parse(payload.toString())
-                if(model.thingId == 'no.sintef.sct.giot:SINTEF9977'){
+                if(model.thingId == 'no.sintef.sct.giot:tellu_gw1'){
                     console.log(JSON.stringify(model, null, ' '))
                     let input = await prompts({
                         type: 'text',
@@ -50,9 +50,15 @@ program
                     });
                     if(input.command == 'start'){
                         console.log('create response...')
+                        // let desired = {
+                        //     localFile: "ext/trust-agent-image.tar.gz",
+                        //     image: "songhui/trust-agent:latest",
+                        //     status: "running",
+                        //     name: "trust_agent"
+                        // }
                         let desired = {
-                            localFile: "ext/trust-agent-image.tar.gz",
-                            image: "songhui/trust-agent:latest",
+                            localFile: "ext/ta_armv7.tar.gz",
+                            image: "erat/ta-sample:armv7",
                             status: "running",
                             name: "trust_agent"
                         }

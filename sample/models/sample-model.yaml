@@ -11,7 +11,7 @@ types:
     port: 22
   mock_env:
     _type: exec_env
-    name: mock
+    name: mock    
   linux_device:
     _type: device
     host: __local_ip__
@@ -25,6 +25,16 @@ types:
     arch: arm64
     execEnv:
       _from: docker_env
+  gw:
+    arch: armv7
+    execEnv:
+      _from: docker_env
+  axis_cam:
+    host: __some_local_ip__
+    execEnv:
+      _type: exec_env
+      name: axis_cam_api
+      username: root
     
   software_artifact: 
     _type: software
@@ -65,7 +75,16 @@ devices:
     thingId: no.sintef.sct.giot:mockupdevice
     execEnv:
       _from: mock_env
-
+  my_local_tellugateway:
+    _from: gw
+    host: 192.168.32.5 # remember to change according to the network
+    thingId: no.sintef.sct.giot:tellu_gw1
+    agent: ta_docker_armv7
+  my_axis_cam1:
+    _from: axis_cam
+    host: 192.168.32.4
+    thingId: no.sintef.sct.giot:tellu_axis_cam1
+    agent: ta_axis_hb
 
 agents:
   ta_docker_amd64:
@@ -85,6 +104,13 @@ agents:
   mockup_agent:
     _from: software_artifact
     remoteFile: mockupAgent
+  ta_docker_armv7:
+    _from: docker_component
+    image: erat/ta-sample:armv7
+    localFile: ext/ta_armv7.tar.gz
+  ta_axis_hb:
+    _from: software_artifact
+    localFile: ./ext/tahb_1_0_0_armv7hf.eap
 
     
 
