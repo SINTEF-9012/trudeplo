@@ -38,8 +38,12 @@ export class AxisAdapter extends AbstractAdapter{
         console.log(result)
         return result
     }
-    runAgent(): Promise<any> {
-        throw new Error("Method not implemented.");
+    async runAgent(): Promise<any> {
+        const appName = this.getAgent()['name']
+        if(!appName)
+            throw Error('Axis require a name its application (trust agent)')
+        let result = await this.axisClient.controlApplication(appName, 'start')
+        return result
     }
     stopAgent(): Promise<any> {
         throw new Error("Method not implemented.");

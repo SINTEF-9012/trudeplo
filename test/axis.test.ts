@@ -5,7 +5,7 @@ import {getPassword} from '../src/fleet/local-credential'
 
 
 
-describe("test axis connection",  ()=>{
+describe.skip("test axis connection",  ()=>{
     // Not working under WSL
     it("Ping axis", async ()=>{
         const adapter = new AxisAdapter({host:'192.168.32.4'})
