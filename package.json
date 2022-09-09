@@ -50,5 +50,8 @@
     "wait": "^0.4.2",
     "xml2js": "^0.4.23",
     "yaml": "^2.1.1"
+  },
+  "transform": {
+    "\\.js$": "<rootDir>/node_modules/babel-jest"
   }
 }

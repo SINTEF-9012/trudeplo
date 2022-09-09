@@ -110,6 +110,7 @@ agents:
     localFile: ext/ta_armv7.tar.gz
   ta_axis_hb:
     _from: software_artifact
+    developer: songhui
     localFile: ./ext/tahb_1_0_0_armv7hf.eap
     name: heartbeatv2
     url: https://eratblob.blob.core.windows.net/newcontainer/tahb_1_0_0_armv7hf.eap
