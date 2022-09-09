@@ -31,7 +31,13 @@ export async function verifyArtifact(model: VerifiableArtifact){
         {cwd: process.cwd()}
     )
     // let result = await execAsync('cat ./ext/download-images.sh')
-    console.log(result.stderr)
-    console.log(result.stdout)
+    let verified = result.stderr.includes('OK')
+    if(verified){
+        return true
+    }
+    else{
+        throw Error(result.stdout)
+    }
+    //console.log(result.stdout)
     
 }

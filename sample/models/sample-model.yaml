@@ -75,6 +75,7 @@ devices:
     thingId: no.sintef.sct.giot:mockupdevice
     execEnv:
       _from: mock_env
+    agent: ta_axis_hb
   my_local_tellugateway:
     _from: gw
     host: 192.168.32.5 # remember to change according to the network

@@ -13,12 +13,13 @@ program
         const client = mqtt.connect('tcp://test.mosquitto.org:1883')
         let result = await client.subscribe('no.sintef.sct.giot.things/upstream')
         let result2 = await client.subscribe('no.sintef.sct.giot.things/request')
+        const sampleModel =  loadFromYaml('sample/models/sample-model.yaml')
         client.on('message', async (topic, payload, packet)=>{
             if(topic == 'no.sintef.sct.giot.things/request'){
                 let message = payload.toString()
                 if(message == 'FetchAll'){
                     console.log('Sending downstream device models...');
-                    let model = loadFromYaml('sample/models/sample-model.yaml')
+                    let model = sampleModel
                     Object.values(model.devices).forEach( (dev: any) =>{
                         let payload = {
                             thingId: dev.thingId,
@@ -40,7 +41,7 @@ program
             }
             if(topic == 'no.sintef.sct.giot.things/upstream'){
                 let model = JSON.parse(payload.toString())
-                if(model.thingId == 'no.sintef.sct.giot:tellu_gw1'){
+                if(model.thingId == 'no.sintef.sct.giot:mockupdevice'){
                     console.log(JSON.stringify(model, null, ' '))
                     let input = await prompts({
                         type: 'text',
@@ -50,17 +51,10 @@ program
                     });
                     if(input.command == 'start'){
                         console.log('create response...')
-                        // let desired = {
-                        //     localFile: "ext/trust-agent-image.tar.gz",
-                        //     image: "songhui/trust-agent:latest",
-                        //     status: "running",
-                        //     name: "trust_agent"
-                        // }
+                        
                         let desired = {
-                            localFile: "ext/ta_armv7.tar.gz",
-                            image: "erat/ta-sample:armv7",
-                            status: "running",
-                            name: "trust_agent"
+                            ...sampleModel.agents['ta_axis_hb'],
+                            status: 'running'
                         }
                         if(!model.features.agent){
                             model.features.agent = {}
