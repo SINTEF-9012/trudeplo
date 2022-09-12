@@ -95,10 +95,10 @@ export class DittoConnector{
         // continue if a new adapter must be created
         let adapter = createAdapter({
             thingId: downId,
-            host: model.attributes.host,
+            host: model._attributes.host,
             attribute: {},
             meta: {},
-            execEnv: model.features.execEnv.properties
+            execEnv: model._features.execEnv._properties
         })
         this.adapters[downId] = adapter;
         this.adaptersByThingId[downId] = adapter;

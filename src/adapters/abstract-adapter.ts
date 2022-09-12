@@ -182,9 +182,9 @@ export abstract class AbstractAdapter{
      * @param twin 
      */
     async receiveTwin(twin: any){
-        if(twin.features.agent && twin.features.agent.desiredProperties)
+        if(twin._features.agent && twin._features.agent._desiredProperties)
             await this.updateAgentFromTwin(
-                twin.features.agent.desiredProperties
+                twin._features.agent._desiredProperties
             );
     }
 

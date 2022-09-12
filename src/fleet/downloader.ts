@@ -1,4 +1,5 @@
 import assert from 'assert';
+import { Console } from 'console';
 import download from 'download';
 import fs from 'fs';
 
@@ -28,11 +29,25 @@ export async function downloadArtifact(model: BasicDownloadableArtifact){
     const localFile = `${DOWNLOAD_ROOT}/${fileName}`
     assert( fs.lstatSync(localFile).isFile() )
 
-    const sigBuff = await download(`${url}.sig`)
-    const sig = sigBuff.toString()
-    console.log(sig)
-    model.signature = sig
+    console.log('Artifact downloaded from ${url}')
+
+    const sigurl = `${url}.sig`
+    try{
+        
+        const sigBuff = await download(sigurl)
+        const sig = sigBuff.toString()
+        console.log(sig)
+        model.signature = sig
+        console.log(`Signature from ${sigurl}`)
+    }
+    catch(e){
+        console.log(`Signature not found at ${sigurl}`)
+    }
+
+
 
     model.localFile = localFile
+
+    console.log('Artifact downloaded from ${url}')
 
 }

@@ -30,9 +30,10 @@ export async function verifyArtifact(model: VerifiableArtifact){
         `cosign verify-blob --key ${pubkey} --signature ${model.signature?.trim()} ${model.localFile}`,
         {cwd: process.cwd()}
     )
-    // let result = await execAsync('cat ./ext/download-images.sh')
+
     let verified = result.stderr.includes('OK')
     if(verified){
+        console.log(`Artifect verfied with signature of ${model.developer}: OK`)
         return true
     }
     else{
