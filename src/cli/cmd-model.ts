@@ -10,7 +10,7 @@ program
     .argument('<string>')
     .action((str)=>{
         let model = loadFromYaml(str)
-        console.log(model)
+        console.log(JSON.stringify(model, null, ' '))
     })
 
 program.parse(process.argv)
