@@ -1,15 +1,28 @@
 const { exec } = require("child_process");
-const verification_status = "false";
+const fs = require('fs');
+let var11 = "Verified OK";
+let var22 = "";
+let var1="";
+let var2="";
 
-exec("go version", (error, stdout, stderr) => {
+exec("cosign verify-blob --key /mnt/c/Users/shukunt/git/trudeplo/SignVerifyContainers/dummyDLT/cosign2.pub --signature /mnt/c/Users/shukunt/git/trudeplo/SignVerifyContainers/SignRepository/blob.sig TestAgent2.txt > out.txt 2> error.txt", (error, stdout, stderr) => {
     if (error) {
-        console.log(`error: ${error.message}`);
+      console.error('error: ' + error);
         return;
     }
-    if (stderr) {
-        console.log(`stderr: ${stderr}`);
-        return;
-    }
-    console.log(`stdout: ${stdout}` + `verification status: ${verification_status}`);
-    console.log(`stdout: ${stdout}`);
+    console.log('var22 old: ' + var22);
+    var22 = fs.readFileSync('error.txt', 'utf-8');
+    console.log('var11: ' + var11);
+    console.log('var22: ' + var22);
+
+    var1 = var11.toString(); 
+    var2 = var22.toString();
+    
+    console.log(var11 === "Verified OK");
+    console.log(var1 === var2);
+
+    if(var11 === var22)
+      console.log("TA verified.");
+    else
+      console.log("TA cannot be verified.");   
 });

@@ -11,7 +11,7 @@ export class ProcessAdapter extends AbstractAdapter{
 
     getFilePath(){
         let path = this.getWorkingPath()
-        let fileName = this.getAgent()['remoteFile']
+        let fileName = this.getAgent()['remoteFile'] ?? this.getAgent()['name']
         let filePath = `${path}/${fileName}`
         return filePath
     }
@@ -38,26 +38,26 @@ export class ProcessAdapter extends AbstractAdapter{
 
     async loadAgent(): Promise<any> {
         let filePath = this.getFilePath()
-        fs.writeFileSync(filePath, '')
+        let localFile = this.getAgent()['localFile']
+        fs.copyFileSync(localFile, filePath)
         return this.getAgent()
     }
 
     async runAgent(): Promise<any> {
         let filePath = this.getFilePath()
-        fs.writeFileSync(filePath, 'running')
+        fs.writeFileSync(this.getFilePath()+'.running', 'nothing')
         return this.getAgent()
     }
 
     async stopAgent(): Promise<any> {
         let filePath = this.getFilePath()
-        fs.writeFileSync(filePath, 'stopped')
+        fs.unlinkSync(this.getFilePath()+'.running')
         return this.getAgent()
     }
 
     async isAgentRunning(): Promise<boolean> {
-        let filePath = this.getFilePath()
-        let content = fs.readFileSync(filePath, 'utf-8')
-        return content == 'running';
+        let filePath = this.getFilePath()+'.running'
+        return fs.lstatSync(filePath).isFile()
     }
     
 }

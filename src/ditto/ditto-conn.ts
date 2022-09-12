@@ -69,8 +69,8 @@ export class DittoConnector{
             await(adapter.launchOperation('ping'))
         }
         await this.pubDevice(adapter)
-        await wait(20 * 1000) //wait a minute (20 seconds for testing purpose)
-        this.heartbeat(adapter)
+        await wait(30 * 1000) //wait a minute (half for testing purpose)
+        await this.heartbeat(adapter)
     }
 
     async startSubDownstream(){
@@ -78,9 +78,10 @@ export class DittoConnector{
         this.client.on('message', async (topic, payload, packet)=>{
             if(topic == `${this.connInfo.rootTopic}/downstream`){
                 console.log(payload.toString())
-                let model = JSON.parse(payload.toString());
-                let adapter = this.locateAdapter(model)
-                await adapter.receiveTwin(model)
+                let twinModel = JSON.parse(payload.toString());
+                let adapter = this.locateAdapter(twinModel)
+                await adapter.receiveTwin(twinModel)
+                
             }
         })
     }
@@ -90,6 +91,8 @@ export class DittoConnector{
         if(downId in this.adaptersByThingId)
             return this.adaptersByThingId[downId]
         // Thinking about other ways to match existing adapters
+
+        // continue if a new adapter must be created
         let adapter = createAdapter({
             thingId: downId,
             host: model.attributes.host,
@@ -97,9 +100,9 @@ export class DittoConnector{
             meta: {},
             execEnv: model.features.execEnv.properties
         })
-        this.heartbeat(adapter)
         this.adapters[downId] = adapter;
         this.adaptersByThingId[downId] = adapter;
+        this.heartbeat(adapter)
         return adapter
     }
 

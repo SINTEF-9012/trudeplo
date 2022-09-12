@@ -1,3 +1,6 @@
+import { downloadArtifact } from "../fleet/downloader";
+import { verifyArtifact } from "../verifier/verify-artifact";
+
 type OperationName = 'ping' | 'info' | 'load_agent' | 'start_agent' | 'stop_agent' | 'ping_agent';
 type DeviceState = 'created' | 'connected' | 'disconnected';
 type AgentStatus = 'unloaded' | 'running' | 'stopped';
@@ -54,11 +57,14 @@ export abstract class AbstractAdapter{
                     break;
                 }
                 case 'load_agent': {
+                    await this.beforeLoadAgent()
                     result = await this.loadAgent();
+                    this.getAgent()['status'] = 'stopped'
                     break;
                 }
                 case 'start_agent': {
                     result = await this.runAgent();
+                    this.getAgent()['status'] = 'started'
                     break;
                 }
                 case 'stop_agent':{
@@ -98,6 +104,26 @@ export abstract class AbstractAdapter{
 
     getAgent(){
         return this.model['_agent'] 
+    }
+
+    async beforeLoadAgent(){
+        const agent = this.getAgent()
+        try{ await downloadArtifact(agent) }
+        catch(e){
+            //if this is already a localFile, we can tolerate a failure of download
+            if(agent.url || !agent.localFile) 
+                throw e;
+        }
+        if(agent.developer && agent.signature){
+            try{ 
+                let verif = await verifyArtifact(agent) 
+                if(verif == false)
+                    throw Error ('not verified')
+            }
+            catch(e){
+                throw e
+            }
+        }
     }
 
     /**

@@ -75,6 +75,7 @@ devices:
     thingId: no.sintef.sct.giot:mockupdevice
     execEnv:
       _from: mock_env
+    agent: ta_axis_hb
   my_local_tellugateway:
     _from: gw
     host: 192.168.32.5 # remember to change according to the network
@@ -106,8 +107,10 @@ agents:
     remoteFile: mockupAgent
   ta_docker_armv7:
     _from: docker_component
+    url: https://eratblob.blob.core.windows.net/newcontainer/ta_armv7.tar.gz
     image: erat/ta-sample:armv7
-    localFile: ext/ta_armv7.tar.gz
+    developer: songhui
+    name: ta_armv7
   ta_axis_hb:
     _from: software_artifact
     developer: songhui
