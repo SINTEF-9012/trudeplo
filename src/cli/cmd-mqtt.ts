@@ -3,6 +3,9 @@ import * as mqtt from "async-mqtt";
 import prompts from 'prompts';
 import { loadFromYaml } from "../model/model-handler";
 
+const LISTEN_TO = "tellu_gw1"
+const SAMPLE_AGENT = "ta_docker_armv7"
+
 program
     .name('mqtt')
     
@@ -14,6 +17,7 @@ program
         let result = await client.subscribe('no.sintef.sct.giot.things/upstream')
         let result2 = await client.subscribe('no.sintef.sct.giot.things/request')
         const sampleModel =  loadFromYaml('sample/models/sample-model.yaml')
+        let flagged = false
         client.on('message', async (topic, payload, packet)=>{
             if(topic == 'no.sintef.sct.giot.things/request'){
                 let message = payload.toString()
@@ -40,20 +44,24 @@ program
                 }
             }
             if(topic == 'no.sintef.sct.giot.things/upstream'){
+                if(flagged)
+                    return;
                 let model = JSON.parse(payload.toString())
-                if(model.thingId == 'no.sintef.sct.giot:mockupdevice'){
+                if(model.thingId == `no.sintef.sct.giot:${LISTEN_TO}`){
                     console.log(JSON.stringify(model, null, ' '))
+                    flagged = true
                     let input = await prompts({
                         type: 'text',
                         name: 'command',
                         message: 'What do you want?',
                         validate: value => value in ['start', 'stop'] ? 'invalid command' : true
                     });
+                    flagged = false
                     if(input.command == 'start'){
                         console.log('create response...')
                         
                         let desired = {
-                            ...sampleModel.agents['ta_axis_hb'],
+                            ...sampleModel.agents[SAMPLE_AGENT],
                             status: 'running'
                         }
                         if(!model.features.agent){
