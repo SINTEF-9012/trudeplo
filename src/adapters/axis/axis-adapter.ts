@@ -24,8 +24,8 @@ export class AxisAdapter extends AbstractAdapter{
         const {data: {propertyList}} = await this.axisClient.getDeviceInfo()
         const {Architecture, Version, ProdFullName, SerialNumber} = propertyList
         const info = `${ProdFullName}, ${Version} on ${Architecture}. SerialNumber: ${SerialNumber}`
-        this.getModel().attribute = {
-            ...this.getModel().attribute,
+        this.getModel().attributes = {
+            ...this.getModel().attributes,
             arch: Architecture,
             info: info
         }
@@ -45,11 +45,12 @@ export class AxisAdapter extends AbstractAdapter{
         let result = await this.axisClient.controlApplication(appName, 'start')
         return result
     }
-    stopAgent(): Promise<any> {
-        throw new Error("Method not implemented.");
+    async stopAgent(): Promise<any> {
+        //do nothing
+        return 'not supported';
     }
-    isAgentRunning(): Promise<boolean> {
-        throw new Error("Method not implemented.");
+    async isAgentRunning(): Promise<boolean> {
+        return false;
     }
     
 }

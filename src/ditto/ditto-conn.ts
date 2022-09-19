@@ -55,8 +55,10 @@ export class DittoConnector{
     }
 
     async pubDevice(device: AbstractAdapter){
-        let topic = `${this.connInfo.rootTopic}/upstream`
-        return this.client.publish(topic, device.getTwinString(' '))
+        let topic = `${this.connInfo.rootTopic}/upstream`;
+        let twinString = device.getTwinString(' ');
+        // console.log(twinString)
+        return this.client.publish(topic, twinString)
     }
 
     async heartbeat(adapter: AbstractAdapter){
@@ -87,16 +89,17 @@ export class DittoConnector{
     }
 
     private locateAdapter(model: any){
-        const downId = model.thingId;
+        const downId = model._thingId;
+        console.log(`find device: ${downId}`)
         if(downId in this.adaptersByThingId)
             return this.adaptersByThingId[downId]
         // Thinking about other ways to match existing adapters
-
+        console.log('create adapter for it')
         // continue if a new adapter must be created
         let adapter = createAdapter({
             thingId: downId,
             host: model._attributes.host,
-            attribute: {},
+            attributes: model._attributes,
             meta: {},
             execEnv: model._features.execEnv._properties
         })

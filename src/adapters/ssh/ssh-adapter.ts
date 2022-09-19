@@ -52,7 +52,7 @@ export class SshAdapter extends AbstractAdapter{
         const result = await conn.execCommand('uname -a')
         const info = result.stdout
         const infoArray = info.split(' ')
-        this.getModel().attribute.arch = infoArray[infoArray.length-2]
+        this.getModel().attributes.arch = infoArray[infoArray.length-2]
         return info
     }
 

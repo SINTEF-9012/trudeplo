@@ -85,7 +85,7 @@ export class DockerAdapter extends AbstractAdapter{
 
     async _info(): Promise<string> {
         const version = await this.docker.version()
-        this.getModel().attribute.arch = version.Arch
+        this.getModel().attributes.arch = version.Arch
         return `Docker Engine ${version.Version} on ${version.Arch} with ${version.Os}, API ${version.ApiVersion}`
     }
 

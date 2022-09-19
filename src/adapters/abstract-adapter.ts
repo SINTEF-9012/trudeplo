@@ -18,9 +18,10 @@ export interface BasicDeviceModel {
         latestState?: DeviceState;
         lastSeen?: Date;
     };
-    attribute:{
+    attributes:{
         info?: string;
         arch?: string;
+        type?: string;
     };
 }
 
@@ -31,8 +32,8 @@ export interface BasicArtifactModel{
 
 export abstract class AbstractAdapter{
     model: BasicDeviceModel
-    constructor(model: {agent?: any}){
-        this.model = {...model, meta:{}, attribute:{}}
+    constructor(model: {agent?: any, attributes?:any}){
+        this.model = {...model, meta:{}, attributes: {...model.attributes}}
         this.model.meta.latestState = 'created'
     }
 
@@ -49,7 +50,7 @@ export abstract class AbstractAdapter{
             switch(operation){
                 case 'info': {
                     result = await this._info();
-                    model.attribute.info = result;
+                    model.attributes!.info = result;
                     break;
                 }
                 case 'ping': {
@@ -83,7 +84,7 @@ export abstract class AbstractAdapter{
             return result;
         }
         catch(e: any){
-            console.log(e)
+            // console.log(e)
             model.meta.latestFailMessage = e.toString()
             model.meta.latestState = 'disconnected'
             return 'not connected'
@@ -151,7 +152,7 @@ export abstract class AbstractAdapter{
         let model = this.getModel()
         return {
             thingId: model.thingId,
-            attributes: model.attribute,
+            attributes: model.attributes,
             features:{
                 execEnv:{
                     properties: model.execEnv
@@ -190,6 +191,7 @@ export abstract class AbstractAdapter{
 
     private async updateAgentFromTwin(desiredAgent: any) {
         let currentAgent = this.getAgent();
+        console.log(currentAgent)
         if (!currentAgent) {
             this.setAgent(desiredAgent); //status will be set to 'unloaded'
             currentAgent = this.getAgent();
