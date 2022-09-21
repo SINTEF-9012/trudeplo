@@ -96,13 +96,18 @@ export class DittoConnector{
         // Thinking about other ways to match existing adapters
         console.log('create adapter for it')
         // continue if a new adapter must be created
-        let adapter = createAdapter({
+        let newModel = {
             thingId: downId,
+            policyId: model._policyId,
             host: model._attributes.host,
             attributes: model._attributes,
-            meta: {},
+            meta: model._features.meta._properties,
             execEnv: model._features.execEnv._properties
-        })
+        }
+        newModel.meta.lastSeen = new Date('1995-12-17T03:24:00');
+        newModel.meta.latestFailMessage = '';
+        let adapter = createAdapter(newModel)
+
         this.adapters[downId] = adapter;
         this.adaptersByThingId[downId] = adapter;
         this.heartbeat(adapter)

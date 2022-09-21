@@ -7,6 +7,7 @@ type AgentStatus = 'unloaded' | 'running' | 'stopped';
 
 export interface BasicDeviceModel {
     thingId?: string;
+    policyId?: string;
     _agent?: any;
     execEnv?: any;
     agent?: any;
@@ -80,12 +81,13 @@ export abstract class AbstractAdapter{
             
             model.meta.lastSeen = new Date();
             model.meta.latestState = 'connected'
-            model.meta.latestFailMessage = undefined
+            model.meta.latestFailMessage = ''
             return result;
         }
         catch(e: any){
             // console.log(e)
             model.meta.latestFailMessage = e.toString()
+            if(operation == 'info' || operation == 'ping')
             model.meta.latestState = 'disconnected'
             return 'not connected'
         }
@@ -108,6 +110,7 @@ export abstract class AbstractAdapter{
     }
 
     async beforeLoadAgent(){
+        console.log('before loading')
         const agent = this.getAgent()
         try{ await downloadArtifact(agent) }
         catch(e){
@@ -152,6 +155,7 @@ export abstract class AbstractAdapter{
         let model = this.getModel()
         return {
             thingId: model.thingId,
+            policyId: model.policyId,
             attributes: model.attributes,
             features:{
                 execEnv:{
@@ -191,7 +195,7 @@ export abstract class AbstractAdapter{
 
     private async updateAgentFromTwin(desiredAgent: any) {
         let currentAgent = this.getAgent();
-        console.log(currentAgent)
+        console.log(desiredAgent)
         if (!currentAgent) {
             this.setAgent(desiredAgent); //status will be set to 'unloaded'
             currentAgent = this.getAgent();
@@ -200,6 +204,12 @@ export abstract class AbstractAdapter{
             (currentAgent.url != desiredAgent.url) ||
             (currentAgent.signature != desiredAgent.signature)
         ) { //when a different agent was required
+            currentAgent.url = desiredAgent.url
+            currentAgent.remoteFile = desiredAgent.remoteFile
+            currentAgent.developer = desiredAgent.developer
+            currentAgent.cmd = desiredAgent.cmd
+            currentAgent.cwd = desiredAgent.cwd
+            currentAgent.localFile = desiredAgent.localFile
             currentAgent.status = 'unloaded';
         }
 
