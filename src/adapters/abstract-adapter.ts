@@ -195,7 +195,7 @@ export abstract class AbstractAdapter{
 
     private async updateAgentFromTwin(desiredAgent: any) {
         let currentAgent = this.getAgent();
-        console.log(desiredAgent)
+        // console.log(desiredAgent)
         if (!currentAgent) {
             this.setAgent(desiredAgent); //status will be set to 'unloaded'
             currentAgent = this.getAgent();
