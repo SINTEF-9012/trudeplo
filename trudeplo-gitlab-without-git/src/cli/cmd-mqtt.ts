@@ -3,8 +3,8 @@ import * as mqtt from "async-mqtt";
 import prompts from 'prompts';
 import { loadFromYaml } from "../model/model-handler";
 
-//const LISTEN_TO = "tellu_gw1"
-const LISTEN_TO = "my_local_rpi4"
+// const LISTEN_TO = "tellu_gw1"
+const LISTEN_TO = "raspberrypi_1"
 const SAMPLE_AGENT = "ta_docker_armv7"
 
 program
@@ -27,17 +27,21 @@ program
                     let model = sampleModel
                     Object.values(model.devices).forEach( (dev: any) =>{
                         let payload = {
-                            thingId: dev.thingId,
-                            attributes: {
+                            _thingId: dev.thingId,
+                            _attributes: {
                                 host: dev.host,
                                 arch: dev.arch
                             },
-                            features:{
+                            _features:{
                                 execEnv:{
-                                    properties: dev.execEnv
+                                    _properties: dev.execEnv
                                 },
-                                agent:{},
-                                meta:{}
+                                agent:{
+                                    _properties: {}
+                                },
+                                meta:{
+                                    _properties: {}
+                                }
                             }
                         }
                         client.publish('no.sintef.sct.giot.things/downstream', JSON.stringify(payload))
@@ -68,8 +72,15 @@ program
                         if(!model.features.agent){
                             model.features.agent = {}
                         }
-                        model.features.agent.desiredProperties = desired
-                        await client.publish('no.sintef.sct.giot.things/downstream', JSON.stringify(model))
+                        model.features.agent._desiredProperties = desired
+                        let newModel = {
+                            _thingId: model.thingId,
+                            _attributes: model.attributes,
+                            _features: model.features
+                        }
+
+                        console.log(JSON.stringify(newModel, null, ' '))
+                        await client.publish('no.sintef.sct.giot.things/downstream', JSON.stringify(newModel))
                         
                         console.log('response sent')
                     }
